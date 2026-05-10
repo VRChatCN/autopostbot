@@ -89,16 +89,19 @@ if os.path.exists(config_path):#加载设置
 
 auth_fetched = settings.get("auth")
 twofactorauth_fetched = settings.get("twofactorauth")#cookies读入至变量
-group_id = settings.get("instance_id")#将要监听与发送的群组
+group_id = settings.get("group_id")#将要监听与发送的群组
 is_prepost_enabled = bool(settings.get("is_prepost_enabled"))#是否启用零号消息
+user = settings.get("username")
+passwd = settings.get("password")
+
 print(f"[{datetime.datetime.now()}] Group ID: {group_id}")
 
 start_time = datetime.datetime.now()
 
 if auth_fetched =="" and twofactorauth_fetched=="":
     configuration = vrchatapi.Configuration(
-        username='mikuwithgary',
-        password='CAOhg:114514',
+        username=user,
+        password=passwd,
     )
 else:
     configuration = vrchatapi.Configuration()

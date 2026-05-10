@@ -1,6 +1,8 @@
 {
   "auth": "",
   "twofactorauth": "",
-  "instance_id": "grp_3138db35-4e4b-4e1b-b741-762409ea43c3",
-  "is_prepost_enabled": 0
+  "group_id": "grp_3138db35-4e4b-4e1b-b741-762409ea43c3",
+  "is_prepost_enabled": 0,
+  "username": "",
+  "password": ""
 }
