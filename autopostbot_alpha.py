@@ -88,23 +88,24 @@ if os.path.exists(config_path):#加载设置
         settings = {}
 
 auth_fetched = settings.get("auth")
-twofactorauth_fetched = settings.get("twofactorauth")#读入至变量
-group_id = settings.get("instance_id")
+twofactorauth_fetched = settings.get("twofactorauth")#cookies读入至变量
+group_id = settings.get("instance_id")#将要监听与发送的群组
+is_prepost_enabled = bool(settings.get("is_prepost_enabled"))#是否启用零号消息
 print(f"[{datetime.datetime.now()}] Group ID: {group_id}")
 
 start_time = datetime.datetime.now()
 
 if auth_fetched =="" and twofactorauth_fetched=="":
     configuration = vrchatapi.Configuration(
-        username='',
-        password='',
+        username='mikuwithgary',
+        password='CAOhg:114514',
     )
 else:
     configuration = vrchatapi.Configuration()
 
 with vrchatapi.ApiClient(configuration) as api_client:
 #init api
-    if auth_fetched!="" and twofactorauth_fetched!="":
+    if auth_fetched=="" and twofactorauth_fetched=="":
         api_client.rest_client.cookie_jar.set_cookie(
             make_cookie("auth", auth_fetched))
         api_client.rest_client.cookie_jar.set_cookie(
@@ -134,20 +135,20 @@ with vrchatapi.ApiClient(configuration) as api_client:
     instance_list = []
     instance_list_new = []
     seen_instance_ids = set()
-    poll_delay = 15
-    post_delay = 60
-    
-    create_group_post_request = vrchatapi.CreateGroupPostRequest(
-                title="autopostbot_Alpha测试消息",
-                text=f"当前时刻 {datetime.datetime.now()}，服务已启动，实例监听将在180秒后开始，期间如创建房间将无法自动发帖，还请各位注意~",
-                send_notification=True,
-                visibility="public"
-            ) # CreateGroupPostRequest | 
-    try:
-        # Create a post in a Group
-        api_response = api_instance.add_group_post(group_id, create_group_post_request) 
-    except ApiException as e:
-        print(f"[{datetime.datetime.now()}] Exception when calling GroupsApi->add_group_post: {e}")
+    poll_delay = 15 #api拉取延迟，因过小的值刷爆api，小心封号
+    post_delay = 60 #post延迟，过短小心被当成野人发疯
+    if is_prepost_enabled == True:#零号消息
+        create_group_post_request = vrchatapi.CreateGroupPostRequest(
+                    title="autopostbot_Alpha测试消息",
+                    text=f"当前时刻 {datetime.datetime.now()}，服务已启动，实例监听将在180秒后开始，期间如创建房间将无法自动发帖，还请各位注意~",
+                    send_notification=True,
+                    visibility="public"
+                ) # CreateGroupPostRequest | 
+        try:
+            # Create a post in a Group
+            api_response = api_instance.add_group_post(group_id, create_group_post_request) 
+        except ApiException as e:
+            print(f"[{datetime.datetime.now()}] Exception when calling GroupsApi->add_group_post: {e}")
     
     while True:
         try:
@@ -160,7 +161,7 @@ with vrchatapi.ApiClient(configuration) as api_client:
         current_worlds = extract_world_info(api_response)
         pprint(current_worlds)  # 解压并简化api返回的信息，不然stdout就会被api狠狠灌注的喵...
 
-        if not instance_list:
+        if not instance_list:#instance_id记录+判断
             instance_list = current_worlds.copy()
             seen_instance_ids = {item.get('instance_id') for item in instance_list if item.get('instance_id')}
             instance_list_new = []
@@ -171,7 +172,7 @@ with vrchatapi.ApiClient(configuration) as api_client:
                 seen_instance_ids.update(item.get('instance_id') for item in instance_list_new if item.get('instance_id'))
 
         for item in instance_list_new:
-            url = item.get('image_url')
+            url = item.get('image_url')#后续尝试在post中带上地图封面所作出的预留
             name_new = item.get('name')
             print(f"[{datetime.datetime.now()}] New instance detected: {name_new}, {url}")
 
